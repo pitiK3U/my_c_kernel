@@ -1,0 +1,4 @@
+src/kernel.c:15:6:clear_screen	4	static
+src/kernel.c:26:6:write	40	static
+src/kernel.c:65:6:itoa	20	static
+src/kernel.c:81:6:kmain	64	dynamic,bounded

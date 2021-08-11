@@ -1,0 +1,39 @@
+# nasm -f elf32 src/kernel.s -o build/kasm.o
+# clang -m32 -c src/kernel.c -o build/kc.o
+# ld -m elf_i386 -T src/link.ld -o build/kernel build/kasm.o build/kc.o
+# qemu-system-i386 -kernel build/kernel
+
+asmflags = -f elf32
+cflags = -m32 -Wall -Wextra -Wconversion -std=c11 -pedantic -O2 $
+	 -nostdlib -fno-builtin -fno-stack-protector -ffreestanding $
+	 -I'include'
+#	 -nostdinc 
+ldflags = -m elf_i386
+
+rule asm
+    command = nasm $asmflags -o $out $in
+
+rule cc
+    command = clang $cflags -o $out $in
+
+rule link
+    command = ld.lld $ldflags -T src/link.ld -o $out $in
+
+
+build build/boot.o: asm src/boot.s
+
+build build/kernel.o: cc src/kernel.c
+    cflags = $cflags -c
+
+build build/monitor.o: cc src/monitor.c
+    cflags = $cflags -c
+
+build build/kernel: link build/boot.o build/kernel.o build/monitor.o
+
+default build/kernel
+
+
+rule format
+    command = clang-format -i ./include/*.h ./src/*.[ch]
+
+build format: format
